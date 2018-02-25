@@ -3,6 +3,19 @@
 
 int getch(void);
 int ungetch(int);
+int getint(int *);
+
+int main(void)
+{
+	int n, array[10];
+	int i;
+	for (n = 0; n < 10 && getint(&array[n]) != EOF; n++)
+		;
+	for (i = 0; i < 10; i++) {
+		printf("%d\n", array[i]);
+	}
+	return 0;
+}
 
 /* getint: 入力から次の整数を取り出して*pnに入れる */
 int getint(int *pn)
