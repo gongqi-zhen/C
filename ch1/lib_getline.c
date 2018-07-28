@@ -17,6 +17,7 @@ int main(int ac, char *av[])
 
   while ((linelen = getline(&line, &linecap, fp)) > 0)
     fwrite(line, linelen, 1, stdout);
+  free(line);
 
   fclose(fp);
   exit(0);
