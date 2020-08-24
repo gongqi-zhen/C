@@ -17,3 +17,14 @@ int csvgetline(FILE *fin)
         field[nfield++] = unquote(p);
     return nfield
 }
+
+// unquote: 前後のクオートを除去
+char *unquote(char *p)
+{
+    if (p[0] == '"') {
+        if (p[strlen(p)-1] == '"')
+            p[strlen(p)-1] = '\0'
+        p++
+    }
+    return p;
+}
