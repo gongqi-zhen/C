@@ -1,45 +1,39 @@
-#include <stdio.h>
-#include <string.h>
+/* csvgetline: 1行取得し、必要に応じて伸張 */
+/* サンプル入力: "LU",86.25,"11/4/1998","2:19PM",+4.0625 */
 
-int csvgetline(FILE *);
-char *unquote(char *);
-
-char buf[200];  //入力行バッファ
-char *field[20]; // フィールド
-
-// csvtest main: csvgetline関数のテスト
-int main(void)
+char *csvgetline(FILE *fin)
 {
-    int i, nf;
-    while ((nf = csvgetline(stdin)) != -1)
-        for (i = 0; i < nf; i++)
-            printf("field[%d] = '%s'\n", i, field[i]);
-    return 0;
-}
+    int i, c;
+    char *newl, *news;
 
-// csvgetline: 行を読んで解析し、フィールド数を返す
-// サンプル入力: "LU",86.25,"11/4/1998","2:19PM",+4.0625
-
-int csvgetline(FILE *fin)
-{
-    int nfield;
-    char *p, *q;
-
-    if(fgets(buf, sizeof(buf), fin) == NULL)
-        return -1;
-    nfield = 0;
-    for (q = buf; (p=strtok(q,",\n\r")) != NULL; q = NULL)
-        field[nfield++] = unquote(p);
-    return nfield;
-}
-
-// unquote: 前後のクオートを除去
-char *unquote(char *p)
-{
-    if (p[0] == '"') {
-        if (p[strlen(p)-1] == '"')
-            p[strlen(p)-1] = '\0';
-        p++;
+    if (line == NULL) { // 最初の呼び出し時に割り当て
+        maxline = maxfield = 1;
+        line = (char *) malloc(maxline);
+        sline = (char *) malloc(maxline);
+        field = (char **) malloc(maxfield * sizeof(field[0]));
+        if (line == NULL || sline == NULL || field == NULL) {
+            reset();
+            return NULL;    // メモリ不足
+        }
     }
-    return p;
+    for (i = 0; (c=getc(fin)) != EOF && !endofline(fin,c); i++) {
+        if (i >= maxline-1) { // 行を伸張
+            maxline *= 2;   // 現在のサイズを倍に
+            newl = (char *) realloc(line, maxline);
+            news = (char *) realloc(sline, maxline);
+            if (newl == NULL || news == NULL) {
+                reset();
+                return NULL;    // メモリ不足
+            }
+            line = newl;
+            sline = news;
+        }
+        line[i] = c;
+    }
+    line[i] = '\0';
+    if (split() == NOMEM) {
+        reset();
+        return NULL;    // メモリ不足
+    }
+    return (c == EOF && i == 0) ? NULL : line;
 }
