@@ -37,3 +37,15 @@ char *csvgetline(FILE *fin)
     }
     return (c == EOF && i == 0) ? NULL : line;
 }
+
+/* reset : 変数を最初の値に戻す */
+static void reset(void)
+{
+    free(line); /* free(NULL)はANCI Cで容認されている */
+    free(sline);
+    free(field);
+    line = NULL;
+    sline = NULL;
+    field = NULL;
+    maxline = maxfield = nfield = 0;
+}
