@@ -7,3 +7,6 @@ https://daeudaeu.com/stack_queue/
 
 - Go言語 (Golang) でintのスタックとキューを実装してみる
 https://zenn.dev/numacci/articles/golang-stack-queue
+
+GoでStackやFIFOを実装する時にはcontainer/listを使う
+https://twitter.com/mattn_jp/status/1559182181331009536
