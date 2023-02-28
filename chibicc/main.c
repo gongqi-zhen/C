@@ -5,8 +5,10 @@ int main(int argc, char **argv) {
         error("%s: invalid number of arguments\n", argv[0]);
 
     Token *tok = tokenize(argv[1]);
-    Node *node = parse(tok);
+    Function *prog = parse(tok);
 
-    codegen(node);
+    // Traverse the AST to emit assembly.
+    codegen(prog); 
+    
     return 0;
 }
