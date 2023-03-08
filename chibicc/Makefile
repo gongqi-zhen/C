@@ -7,6 +7,7 @@ chibicc: $(OBJS)
 
 test: chibicc
 	./test.sh
+	./test-driver.sh
 
 clean:
 	rm -f chibicc *.o *~ tmp*

@@ -287,7 +287,7 @@ static char *read_file(char *path) {
     size_t buflen;
     FILE *out = open_memstream(&buf, &buflen);
 
-    // Read the entire file.
+    // Read the entire ile.
     for (;;) {
         char buf2[4096];
         int n = fread(buf2, 1, sizeof(buf2), fp);
