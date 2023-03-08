@@ -16,7 +16,7 @@ void error(char *fmt, ...) {
 }
 
 // Reports an error message in the following format and exit.
-static void verror_at(char *loc, char *fmt, va_list ap) {
+static void verror_at(int line_no, char *loc, char *fmt, va_list ap) {
     // Find a line containing `loc`.
     char *line = loc;
     while (current_input < line && line[-1] != '\n')
@@ -25,12 +25,6 @@ static void verror_at(char *loc, char *fmt, va_list ap) {
     char *end = loc;
     while (*end != '\n')
         end++;
-    
-    // Get a line number.
-    int line_no = 1;
-    for (char *p = current_input; p < line; p++)
-        if (*p == '\n')
-            line_no++;
     
     // Print out the line.
     int indent = fprintf(stderr, "%s:%d: ", current_filename, line_no);
@@ -47,15 +41,20 @@ static void verror_at(char *loc, char *fmt, va_list ap) {
 }
 
 void error_at(char *loc, char *fmt, ...) {
+    int line_no = 1;
+    for (char *p = current_input; p < loc; p++)
+        if (*p == '\n')
+            line_no++;
+
     va_list ap;
     va_start(ap, fmt);
-    verror_at(loc, fmt, ap);
+    verror_at(line_no, loc, fmt, ap);
 }
 
 void error_tok(Token *tok, char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
-    verror_at(tok->loc, fmt, ap);
+    verror_at(tok->line_no, tok->loc, fmt, ap);
 }
 
 // Consumes the current token if it matches `s`.
@@ -216,6 +215,21 @@ static void convert_keywords(Token *tok) {
             t->kind = TK_KEYWORD;
 }
 
+// Initialize line info for all tokens.
+static void add_line_numbers(Token *tok) {
+    char *p = current_input;
+    int n = 1;
+
+    do {
+        if (p == tok->loc) {
+            tok->line_no = n;
+            tok = tok->next;
+        }
+        if (*p == '\n')
+            n++;
+    } while (*p++);
+}
+
 // Tokenize a given string and returns new tokens.
 static Token *tokenize(char *filename, char *p) {
     current_filename = filename;
@@ -283,6 +297,7 @@ static Token *tokenize(char *filename, char *p) {
     }
     
     cur = cur->next = new_token(TK_EOF, p, p);
+    add_line_numbers(head.next);
     convert_keywords(head.next);
     return head.next;
 }
