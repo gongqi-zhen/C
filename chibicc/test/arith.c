@@ -71,7 +71,8 @@ int main() {
   ASSERT(4, sizeof(!(char)0));
   ASSERT(4, sizeof(!(long)0));
 
-
+  ASSERT(-1, ~0);
+  ASSERT(0, ~-1);
 
   printf("OK\n");
   return 0;
