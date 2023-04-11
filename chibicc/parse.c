@@ -111,6 +111,8 @@ static Type *enum_specifier(Token **rest, Token *tok);
 static Type *type_suffix(Token **rest, Token *tok, Type *ty);
 static Type *declarator(Token **rest, Token *tok, Type *ty);
 static Node *declaration(Token **rest, Token *tok, Type *basety);
+static void initializer2(Token **rest, Token *tok, Initializer *init);
+static Initializer *initializer(Token **rest, Token *tok, Type *ty);
 static Node *lvar_initializer(Token **rest, Token *tok, Obj *var);
 static Node *compound_stmt(Token **rest, Token *tok);
 static Node *stmt(Token **rest, Token *tok);
@@ -613,10 +615,16 @@ static Token *skip_excess_element(Token *tok) {
     return tok;
 }
 
-// initializer = "{" initializer ("," initializer)* "}"
-//             | assign
-static void initializer2(Token **rest, Token *tok, Initializer *init) {
-  if (init->ty->kind == TY_ARRAY) {
+// string-initializer = string-literal
+static void string_initializer(Token **rest, Token *tok, Initializer *init) {
+    int len = MIN(init->ty->array_len, tok->ty->array_len);
+    for (int i = 0; i < len; i++)
+        init->children[i]->expr = new_num(tok->str[i], tok);
+    *rest = tok->next;
+}
+
+// array-initializer = "{" initializer ("," initializer)* "}"
+static void array_initializer(Token **rest, Token *tok, Initializer *init) {
     tok = skip(tok, "{");
 
     for (int i = 0; !consume(rest, tok, "}"); i++) {
@@ -627,10 +635,21 @@ static void initializer2(Token **rest, Token *tok, Initializer *init) {
         else
             tok = skip_excess_element(tok); 
     }
-    return;
-  }
+}
 
-  init->expr = assign(rest, tok);
+// initializer = string-initializer | array-initializer | assign
+static void initializer2(Token **rest, Token *tok, Initializer *init)
+{
+    if (init->ty->kind == TY_ARRAY && tok->kind == TK_STR) {
+        string_initializer(rest, tok, init);
+        return;
+    }
+
+    if (init->ty->kind == TY_ARRAY) {
+        array_initializer(rest, tok, init);
+        return;
+    }
+    init->expr = assign(rest, tok);
 }
 
 static Initializer *initializer(Token **rest, Token *tok, Type *ty) {
