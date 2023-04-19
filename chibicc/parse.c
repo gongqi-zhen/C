@@ -548,10 +548,28 @@ static Type *typename(Token **rest, Token *tok) {
     Type *ty = declspec(&tok, tok, NULL);
     return abstract_declarator(rest, tok, ty);
 }
+
+static bool is_end(Token *tok) {
+    return equal(tok, "}") || (equal(tok, ",") && equal(tok->next, "}"));
+}
+
+static bool consume_end(Token **rest, Token *tok) {
+    if (equal(tok, "}")) {
+        *rest = tok->next;
+        return true;
+    }
+
+    if (equal(tok, ",") && equal(tok->next, "}")) {
+        *rest = tok->next->next;
+        return true;
+    }
+
+    return false;
+}
 // enum-specifier   = ident? "{" enum-list? "}"
 //                  | ident ("{" enum-list? "}")?
 // 
-// enum-list        = ident ("=" num)? ("," ident ("=" num)?)*
+// enum-list        = ident ("=" num)? ("," ident ("=" num)?)* ","?
 static Type *enum_specifier(Token **rest, Token *tok) {
     Type *ty = enum_type();
 
@@ -577,7 +595,7 @@ static Type *enum_specifier(Token **rest, Token *tok) {
     // Read an enum-list.
     int i = 0;
     int val = 0;
-    while (!equal(tok, "}")) {
+    while (!consume_end(rest, tok)) {
         if (i++ > 0)
             tok = skip(tok, ",");
         
@@ -592,8 +610,6 @@ static Type *enum_specifier(Token **rest, Token *tok) {
         sc->enum_val = val++;
     }
     
-    *rest = tok->next;
-
     if(tag)
         push_tag_scope(tag, ty);
     return ty;
@@ -658,7 +674,7 @@ static int count_array_init_elements(Token *tok, Type *ty) {
     Initializer *dummy = new_initializer(ty->base, false);
     int i = 0;
 
-    for (; !equal(tok, "}"); i++) {
+    for (; !consume_end(&tok, tok); i++) {
         if (i > 0)
             tok = skip(tok, ",");
         initializer2(&tok, tok, dummy);
@@ -666,7 +682,7 @@ static int count_array_init_elements(Token *tok, Type *ty) {
     return i;
 }
 
-// array-initializer1 = "{" initializer ("," initializer)* "}"
+// array-initializer1 = "{" initializer ("," initializer)* ","? "}"
 static void array_initializer1(Token **rest, Token *tok, Initializer *init) {
     tok = skip(tok, "{");
 
@@ -675,7 +691,7 @@ static void array_initializer1(Token **rest, Token *tok, Initializer *init) {
         *init = *new_initializer(array_of(init->ty->base, len), false);
     }
 
-    for (int i = 0; !consume(rest, tok, "}"); i++) {
+    for (int i = 0; !consume_end(rest, tok); i++) {
         if (i > 0)
             tok = skip(tok, ",");
         if (i < init->ty->array_len)
@@ -692,7 +708,7 @@ static void array_initializer2(Token **rest, Token *tok, Initializer *init) {
     *init = *new_initializer(array_of(init->ty->base, len), false);
   }
 
-  for (int i = 0; i < init->ty->array_len && !equal(tok, "}"); i++) {
+  for (int i = 0; i < init->ty->array_len && !is_end(tok); i++) {
     if (i > 0)
       tok = skip(tok, ",");
     initializer2(&tok, tok, init->children[i]);
@@ -700,13 +716,13 @@ static void array_initializer2(Token **rest, Token *tok, Initializer *init) {
   *rest = tok;
 }
 
-// struct-initializer1 = "{" initializer ("," initializer)* "}"
+// struct-initializer1 = "{" initializer ("," initializer)* ","? "}"
 static void struct_initializer1(Token **rest, Token *tok, Initializer *init) {
     tok = skip(tok, "{");
 
     Member *mem = init->ty->members;
 
-    while(!consume(rest, tok, "}")) {
+    while(!consume_end(rest, tok)) {
         if (mem != init->ty->members)
             tok = skip(tok, ",");
         
@@ -723,7 +739,7 @@ static void struct_initializer1(Token **rest, Token *tok, Initializer *init) {
 static void struct_initializer2(Token **rest, Token *tok, Initializer *init) {
   bool first = true;
 
-  for (Member *mem = init->ty->members; mem && !equal(tok, "}"); mem = mem->next) {
+  for (Member *mem = init->ty->members; mem && !is_end(tok); mem = mem->next) {
     if (!first)
       tok = skip(tok, ",");
     first = false;
@@ -737,6 +753,7 @@ static void union_initializer(Token **rest, Token *tok, Initializer *init) {
     // and that initializes the first union member.
     if (equal(tok, "{")) {
         initializer2(&tok, tok->next, init->children[0]);
+        consume(&tok, tok, ",");
         *rest = skip(tok, "}");
     } else {
         initializer2(rest, tok, init->children[0]);
