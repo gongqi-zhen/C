@@ -1102,7 +1102,7 @@ static Relocation *write_gvar_data(Relocation *cur, Initializer *init, Type *ty,
 
   if (ty->kind == TY_STRUCT) {
     for (Member *mem = ty->members; mem; mem = mem->next) {
-        if (mem->is_bibitfield) {
+        if (mem->is_bitfield) {
             Node *expr = init->children[mem->idx]->expr;
             if (!expr)
                 break;
@@ -2037,7 +2037,7 @@ static void struct_members(Token **rest, Token *tok, Type *ty) {
             mem->align =attr.align ? attr.align : mem->ty->align;
 
             if (consume(&tok, tok, ":")) {
-                mem->is_bibitfield = true;
+                mem->is_bitfield = true;
                 mem->bit_width = const_expr(&tok, tok);
             }
 
@@ -2112,7 +2112,7 @@ static Type *struct_decl(Token **rest, Token *tok) {
     // Assign offsets within the struct to members.
     int bits = 0;
     for (Member *mem = ty->members; mem; mem = mem->next) {
-        if (mem->is_bibitfield) {
+        if (mem->is_bitfield) {
             int sz = mem->ty->size;
             if (bits / (sz * 8) != (bits + mem->bit_width - 1) / (sz * 8))
                 bits = align_to(bits, sz * 8);

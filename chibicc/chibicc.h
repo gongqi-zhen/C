@@ -314,7 +314,7 @@ struct Member {
     int offset;
 
     // Bitfield
-    bool is_bibitfield;
+    bool is_bitfield;
     int bit_offset;
     int bit_width;
 };

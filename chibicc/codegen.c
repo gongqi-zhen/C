@@ -602,7 +602,7 @@ static void gen_expr(Node *node) {
             load(node->ty);
 
             Member *mem = node->member;
-            if (mem->is_bibitfield) {
+            if (mem->is_bitfield) {
                 println(" shl $%d, %%rax", 64 - mem->bit_width - mem->bit_offset);
                 if (mem->ty->is_unsigned)
                     println(" shr $%d, %%rax", 64 - mem->bit_width);
@@ -623,7 +623,7 @@ static void gen_expr(Node *node) {
             push();
             gen_expr(node->rhs);
 
-            if (node->lhs->kind == ND_MEMBER && node->lhs->member->is_bibitfield) {
+            if (node->lhs->kind == ND_MEMBER && node->lhs->member->is_bitfield) {
                 println(" mov %%rax, %%r8");
 
                 // If the lhs is a bitfield, we need to read the current value
