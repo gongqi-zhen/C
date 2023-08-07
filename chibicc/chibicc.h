@@ -140,6 +140,7 @@ struct Obj {
     Relocation *rel;
 
     // Function
+    bool is_inline;
     Obj *params;
     Node *body;
     Obj *locals;
@@ -201,7 +202,7 @@ typedef enum {
     ND_VAR,         // Variable
     ND_NUM,         // Integer
     ND_CAST,        // Type cast
-    // ND_MEMZERO,     // Zero-clear a stack variable
+    ND_MEMZERO,     // Zero-clear a stack variable
     ND_ASM,         // "asm"
 } NodeKind;
 
