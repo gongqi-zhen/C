@@ -189,13 +189,17 @@ check '-fno-common'
 #check -include
 
 # -x
-#echo 'int x;' | $chibicc -c -xc -o $tmp/foo.o -
-#check -xc
-#echo 'x:' | $chibicc -c -x assembler -o $tmp/foo.o -
-#check '-x assembler'
-#
-#echo 'int x;' > $tmp/foo.c
-#$chibicc -c -x assembler -x none -o $tmp/foo.o $tmp/foo.c
-#check '-x none'
+echo 'int x;' | $chibicc -c -xc -o $tmp/foo.o -
+check -xc
+echo 'x:' | $chibicc -c -x assembler -o $tmp/foo.o -
+check '-x assembler'
+
+echo 'int x;' > $tmp/foo.c
+$chibicc -c -x assembler -x none -o $tmp/foo.o $tmp/foo.c
+check '-x none'
+
+# -E
+echo foo | $chibicc -E - | grep -q foo
+check -E
 
 echo OK
