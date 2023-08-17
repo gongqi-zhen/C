@@ -5,7 +5,9 @@ https://www.sigbus.info/compilerbook
 
 ```
 # 実行環境
- docker run --rm -it -v $HOME/github/C/chibicc:/chibicc -w /chibicc compilerbook
+$ pwd
+/Users/makoto/github/C/chibicc
+$ docker run --rm -it -v $HOME/github/C/chibicc:/chibicc -w /chibicc compilerbook
 ```
 
 # chibicc: A Small C Compiler
