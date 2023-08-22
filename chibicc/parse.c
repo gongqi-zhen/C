@@ -972,7 +972,7 @@ static void string_initializer(Token **rest, Token *tok, Initializer *init) {
 // struct {int a, b, c; } x = { .c=5 };
 // 
 // The above initializer sets x.c to 5.
-static int array_designator(Token **rest, Token *tok, Type *ty, int *begin, int *end) {
+static void array_designator(Token **rest, Token *tok, Type *ty, int *begin, int *end) {
     *begin = const_expr(&tok, tok->next);
     if (*begin >= ty->array_len)
         error_tok(tok, "array designator index exceeds array bounds");
