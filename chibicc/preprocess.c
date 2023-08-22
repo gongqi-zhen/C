@@ -189,7 +189,7 @@ static Token *skip_cond_incl(Token *tok) {
 
         if (is_hash(tok) &&
             (equal(tok->next, "elif") || equal(tok->next, "else") ||
-            (tok->next, "endif")))
+            equal(tok->next, "endif")))
             break;
         tok = tok->next;
     }
@@ -524,9 +524,9 @@ static Token *subst(Token *tok, MacroArg *args) {
         MacroArg *arg = find_arg(args, tok->next);
         if (!arg)
             error_tok(tok->next, "'#' is not followed by a macro parameter");
-            cur = cur->next = stringize(tok, arg->tok);
-            tok = tok->next->next;
-            continue;
+        cur = cur->next = stringize(tok, arg->tok);
+        tok = tok->next->next;
+        continue;
     }
 
     // [GNU] If __VA_ARG__ is empty, `,##_VA_ARGS__` is expanded
