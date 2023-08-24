@@ -91,11 +91,11 @@ int add_all(int n, ...);
 int sprintf(char *buf, char *fmt, ...);
 int vsprintf(char *buf, char *fmt, va_list ap);
 
-// char *fmt(char *buf, char *fmt, ...) {
-//   va_list ap;
-//   *ap = *(__va_elem *)__va_area__;
-//   vsprintf(buf, fmt, ap);
-// }
+char *fmt(char *buf, char *fmt, ...) {
+  va_list ap;
+  *ap = *(__va_elem *)__va_area__;
+  vsprintf(buf, fmt, ap);
+}
 
 double add_double(double x, double y);
 float add_float(float x, float y);
@@ -126,20 +126,20 @@ int add10_int(int x1, int x2, int x3, int x4, int x5, int x6, int x7, int x8, in
 float add10_float(float x1, float x2, float x3, float x4, float x5, float x6, float x7, float x8, float x9, float x10);
 double add10_double(double x1, double x2, double x3, double x4, double x5, double x6, double x7, double x8, double x9, double x10);
 
-// int many_args1(int a, int b, int c, int d, int e, int f, int g, int h) {
-  // return g / h;
-// }
+int many_args1(int a, int b, int c, int d, int e, int f, int g, int h) {
+  return g / h;
+}
 
-// double many_args2(double a, double b, double c, double d, double e,
-                  // double f, double g, double h, double i, double j) {
-  // return i / j;
-// }
+double many_args2(double a, double b, double c, double d, double e,
+                  double f, double g, double h, double i, double j) {
+  return i / j;
+}
 
-// int many_args3(int a, double b, int c, int d, double e, int f,
-                // double g, int h, double i, double j, double k,
-                // double l, double m, int n, int o, double p) {
-  // return o / p;
-// }
+int many_args3(int a, double b, int c, int d, double e, int f,
+                double g, int h, double i, double j, double k,
+                double l, double m, int n, int o, double p) {
+  return o / p;
+}
 
 typedef struct { int a,b; short c; char d; } Ty4;
 typedef struct { int a; float b; double c; } Ty5;
@@ -257,11 +257,11 @@ int main() {
   ASSERT(6, add_all(3,1,2,3));
   ASSERT(5, add_all(4,1,2,3,-1));
 
-  // { char buf[100]; fmt(buf, "%d %d %s", 1, 2, "foo"); printf("%s\n", buf); }
+  { char buf[100]; fmt(buf, "%d %d %s", 1, 2, "foo"); printf("%s\n", buf); }
 
   ASSERT(0, ({ char buf[100]; sprintf(buf, "%d %d %s", 1, 2, "foo"); strcmp("1 2 foo", buf); }));
 
-  // ASSERT(0, ({ char buf[100]; fmt(buf, "%d %d %s", 1, 2, "foo"); strcmp("1 2 foo", buf); }));
+  ASSERT(0, ({ char buf[100]; fmt(buf, "%d %d %s", 1, 2, "foo"); strcmp("1 2 foo", buf); }));
 
   ASSERT(251, uchar_fn());
   ASSERT(65528, ushort_fn());
@@ -274,9 +274,9 @@ int main() {
   ASSERT(7, add_float3(2.5, 2.5, 2.5));
   ASSERT(7, add_double3(2.5, 2.5, 2.5));
 
-  // ASSERT(0, ({ char buf[100]; sprintf(buf, "%.1f", (float)3.5); strcmp(buf, "3.5"); }));
+  ASSERT(0, ({ char buf[100]; sprintf(buf, "%.1f", (float)3.5); strcmp(buf, "3.5"); }));
 
-  // ASSERT(0, ({ char buf[100]; fmt(buf, "%.1f", (float)3.5); strcmp(buf, "3.5"); }));
+  ASSERT(0, ({ char buf[100]; fmt(buf, "%.1f", (float)3.5); strcmp(buf, "3.5"); }));
 
   ASSERT(5, (add2)(2,3));
   ASSERT(5, (&add2)(2,3));
@@ -297,9 +297,9 @@ int main() {
 
   ASSERT(0, ({ char buf[200]; sprintf(buf, "%d %.1f %.1f %.1f %d %d %.1f %d %d %d %d %.1f %d %d %.1f %.1f %.1f %.1f %d", 1, 1.0, 1.0, 1.0, 1, 1, 1.0, 1, 1, 1, 1, 1.0, 1, 1, 1.0, 1.0, 1.0, 1.0, 1); strcmp("1 1.0 1.0 1.0 1 1 1.0 1 1 1 1 1.0 1 1 1.0 1.0 1.0 1.0 1", buf); }));
 
-  // ASSERT(4, many_args1(1,2,3,4,5,6,40,10));
-  // ASSERT(4, many_args2(1,2,3,4,5,6,7,8,40,10));
-  // ASSERT(8, many_args3(1,2,3,4,5,6,7,8,9,10,11,12,13,14,80,10));
+  ASSERT(4, many_args1(1,2,3,4,5,6,40,10));
+  ASSERT(4, many_args2(1,2,3,4,5,6,7,8,40,10));
+  ASSERT(8, many_args3(1,2,3,4,5,6,7,8,9,10,11,12,13,14,80,10));
 
   ASSERT(10, ({ Ty4 x={10,20,30,40}; struct_test4(x, 0); }));
   ASSERT(20, ({ Ty4 x={10,20,30,40}; struct_test4(x, 1); }));
