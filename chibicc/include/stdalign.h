@@ -1,4 +1,3 @@
-
 #ifndef __STDALIGN_H
 #define __STDALIGN_H
 
